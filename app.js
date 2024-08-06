@@ -6,7 +6,7 @@ const path = require('path');
 
 const app = express();
 
-const conectar = require("./database/db");
+const connection = require("./database/db");
 
 app.use(session({
     secret: 'secret',
@@ -58,7 +58,6 @@ app.post('/auth', (req, res) => {
         connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
             if (error) throw error;
             if (results.length > 0) {
-                // Comparar la contraseña encriptada
                 bcrypt.compare(password, results[0].password, (err, isMatch) => {
                     if (isMatch) {
                         req.session.loggedin = true;
@@ -85,10 +84,8 @@ app.get('/home', (req, res) => {
     }
 });
 
-// Servir archivos estáticos (Bootstrap)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Iniciar servidor
 app.listen(3000, () => {
     console.log('Servidor iniciado en http://localhost:3000');
 });
