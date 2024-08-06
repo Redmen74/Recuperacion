@@ -31,16 +31,13 @@ app.post('/register', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
-    // Verifica si el usuario ya existe
     connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
         if (error) throw error;
         if (results.length > 0) {
             res.send('El nombre de usuario ya está registrado');
         } else {
-            // Encriptar la contraseña
             bcrypt.hash(password, 8, (err, hash) => {
                 if (err) throw err;
-                // Insertar el nuevo usuario en la base de datos
                 connection.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], (error, results) => {
                     if (error) throw error;
                     res.redirect('/');
