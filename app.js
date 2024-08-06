@@ -23,12 +23,40 @@ app.get('/', (req, res) => {
     res.render('login');
 });
 
+app.get('/register', (req, res) => {
+    res.render('register');
+});
+
+app.post('/register', (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    // Verifica si el usuario ya existe
+    connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
+        if (error) throw error;
+        if (results.length > 0) {
+            res.send('El nombre de usuario ya está registrado');
+        } else {
+            // Encriptar la contraseña
+            bcrypt.hash(password, 8, (err, hash) => {
+                if (err) throw err;
+                // Insertar el nuevo usuario en la base de datos
+                connection.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], (error, results) => {
+                    if (error) throw error;
+                    res.redirect('/');
+                });
+            });
+        }
+    });
+});
+
 app.post('/auth', (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
 
     if (username && password) {
-        connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results, fields) => {
+        connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
+            if (error) throw error;
             if (results.length > 0) {
                 // Comparar la contraseña encriptada
                 bcrypt.compare(password, results[0].password, (err, isMatch) => {
@@ -43,11 +71,9 @@ app.post('/auth', (req, res) => {
             } else {
                 res.send('Usuario no encontrado');
             }
-            res.end();
         });
     } else {
         res.send('Por favor, ingrese nombre de usuario y contraseña');
-        res.end();
     }
 });
 
@@ -57,7 +83,6 @@ app.get('/home', (req, res) => {
     } else {
         res.send('Por favor, inicie sesión para ver esta página');
     }
-    res.end();
 });
 
 // Servir archivos estáticos (Bootstrap)
