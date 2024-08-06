@@ -1,5 +1,4 @@
 const express = require('express');
-const mysql = require('mysql');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
@@ -7,34 +6,19 @@ const path = require('path');
 
 const app = express();
 
-// Conexión a la base de datos MySQL
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root', 
-    password: '', 
-    database: 'login_db'
-});
+const conectar = require("./database/db");
 
-connection.connect((err) => {
-    if (err) throw err;
-    console.log('Conectado a la base de datos MySQL');
-});
-
-// Configuración de sesiones
 app.use(session({
     secret: 'secret',
     resave: true,
     saveUninitialized: true
 }));
 
-// Configuración de Body-Parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Configuración del motor de plantillas EJS
 app.set('view engine', 'ejs');
 
-// Rutas
 app.get('/', (req, res) => {
     res.render('login');
 });
